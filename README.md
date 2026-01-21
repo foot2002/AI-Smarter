@@ -130,14 +130,56 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+## 배포 방법
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+이 프로젝트는 GitHub Pages와 Vercel 등 다양한 호스팅 환경에서 동일한 코드로 동작하도록 설계되었습니다.
 
-## Can I connect a custom domain to my Lovable project?
+### 환경 변수 설정
 
-Yes, you can!
+배포 전에 `.env` 파일에 다음 변수를 설정하세요:
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+- `VITE_BASE_PATH`: Vite의 base 경로 설정
+  - **Vercel 등 일반 호스팅**: `"/"` (기본값)
+  - **GitHub Pages**: `"/<repo>/"` (예: `"/AI-Smarter/"`)
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+### Vercel 배포
+
+1. Vercel에 프로젝트를 연결합니다.
+2. 환경 변수는 기본값(`VITE_BASE_PATH="/"`)으로 동작하므로 별도 설정이 필요 없습니다.
+3. 빌드 명령어: `npm run build`
+4. 출력 디렉토리: `dist`
+
+### GitHub Pages 배포
+
+1. **환경 변수 설정**
+   - GitHub 저장소의 Settings > Secrets and variables > Actions에서 `VITE_BASE_PATH`를 `"/<repo>/"` 형태로 설정하거나
+   - 로컬에서 빌드 시 `.env.production` 파일에 `VITE_BASE_PATH="/<repo>/"` 설정
+
+2. **빌드 및 배포**
+   ```sh
+   # GitHub Pages용 빌드 (예: repo 이름이 AI-Smarter인 경우)
+   VITE_BASE_PATH="/AI-Smarter/" npm run build
+   
+   # 또는 .env.production 파일 생성 후
+   npm run build
+   
+   # GitHub Pages에 배포
+   npm run deploy
+   ```
+
+3. **404.html 자동 생성**
+   - 빌드 후 `postbuild` 스크립트가 자동으로 `dist/index.html`을 `dist/404.html`로 복사합니다.
+   - 이는 GitHub Pages에서 SPA 라우팅(`/app/...` 등) 직접 접근 시 404 오류를 방지하기 위함입니다.
+
+### 빌드 결과물
+
+빌드 후 `dist` 디렉토리에는 다음 파일들이 생성됩니다:
+- `index.html`: 메인 HTML 파일
+- `404.html`: GitHub Pages SPA fallback용 (자동 생성)
+- `assets/`: CSS, JS 등 정적 파일들
+
+### 주의사항
+
+- **HashRouter 사용 금지**: URL을 깔끔하게 유지하기 위해 BrowserRouter를 사용합니다.
+- **base 경로 일치**: `VITE_BASE_PATH`와 React Router의 `basename`이 자동으로 동기화됩니다.
+- **GitHub Pages 서브패스**: GitHub Pages는 `https://<user>.github.io/<repo>/` 형태로 서비스되므로 반드시 `VITE_BASE_PATH`를 설정해야 합니다.
